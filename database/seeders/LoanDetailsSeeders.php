@@ -40,8 +40,8 @@ class LoanDetailsSeeders extends Seeder
             [
                 'clientid' => 1007, 
                 'num_of_payment' => 4, 
-                'first_payment_date' => Carbon::create('2020', '01', '10'), 
-                'last_payment_date' => Carbon::create('2020', '04', '10'), 
+                'first_payment_date' => Carbon::create('2019', '03', '10'), 
+                'last_payment_date' => Carbon::create('2019', '06', '10'), 
                 'loan_amount' => 5000.00,
             ],
         ]);

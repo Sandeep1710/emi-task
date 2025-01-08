@@ -2,7 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
-
+use App\Http\Controllers\Dashboard\DashboardController;
+use App\Http\Controllers\ProcessController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -21,6 +22,14 @@ Route::get('/login', function () {
 
 Route::post('/login', [AuthController::class, 'login'])->name('auth.login');
 
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
+    Route::get('/loan-details', [DashboardController::class, 'loanDetails'])->name('loan.details');
+    Route::get('/process-data', [DashboardController::class, 'processData'])->name('process.data');
+    Route::post('/process-data/create-table', [ProcessController::class, 'createTable'])->name('process.createTable');
+});
 
 Route::fallback(function () {
     return response()->json(['message' => 'Route not found'], 404);
