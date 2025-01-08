@@ -33,13 +33,17 @@ class ProcessService implements ProcessServiceInterface
         }
 
         $sql = $this->preparStatement($months);
-        return $this->processService->createTable($sql);
+        if($this->processService->createTable($sql)){
+            return $this->makeEntryForAllClients();
+        } else {
+            return false;
+        }
     }
 
     public function preparStatement($months) {
         $columns = '';
         foreach ($months as $month) {
-            $columns .= "`{$month}` DECIMAL(5, 2) DEFAULT 00.0, ";
+            $columns .= "`{$month}` DECIMAL(15, 2) DEFAULT 00.0, ";
         }
 
         $columns = rtrim($columns, ', ');
@@ -52,5 +56,25 @@ class ProcessService implements ProcessServiceInterface
             )
         ";
         
+    }
+
+    public function makeEntryForAllClients() {
+
+        $loanDetails = DB::table('loan_details')->get();
+        foreach ($loanDetails as $loanDetail) {
+            $emiAmount = $loanDetail->loan_amount / $loanDetail->num_of_payment;
+    
+            $firstPaymentDate = Carbon::parse($loanDetail->first_payment_date);
+            $lastPaymentDate = Carbon::parse($loanDetail->last_payment_date);
+    
+            $emiData = ['clientid' => $loanDetail->clientid];
+            while ($firstPaymentDate->lte($lastPaymentDate)) {
+                $monthColumn = $firstPaymentDate->format('Y_M');
+                $emiData[$monthColumn] = $emiAmount;
+                $firstPaymentDate->addMonth();
+            }
+                DB::table('emi_details')->insert($emiData);
+        }
+        return true;
     }
 }

@@ -23,7 +23,6 @@ class ProcessController extends BaseController
     public function createTable()
     {
         if($this->processService->createTable()) {
-            
             return redirect()->route('process.data')->with('success', 'EMI Details table created successfully.');
         } else {
             return redirect()->route('process.data')->with('Error', 'Error while exicuting the query.');
