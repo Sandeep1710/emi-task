@@ -61,20 +61,24 @@ class ProcessService implements ProcessServiceInterface
     public function makeEntryForAllClients() {
 
         $loanDetails = DB::table('loan_details')->get();
-        foreach ($loanDetails as $loanDetail) {
-            $emiAmount = $loanDetail->loan_amount / $loanDetail->num_of_payment;
-    
-            $firstPaymentDate = Carbon::parse($loanDetail->first_payment_date);
-            $lastPaymentDate = Carbon::parse($loanDetail->last_payment_date);
-    
-            $emiData = ['clientid' => $loanDetail->clientid];
-            while ($firstPaymentDate->lte($lastPaymentDate)) {
-                $monthColumn = $firstPaymentDate->format('Y_M');
-                $emiData[$monthColumn] = $emiAmount;
-                $firstPaymentDate->addMonth();
-            }
+
+            foreach ($loanDetails as $loanDetail) {
+                $emiAmount = $loanDetail->loan_amount / $loanDetail->num_of_payment;
+                $firstPaymentDate = Carbon::parse($loanDetail->first_payment_date);
+                $lastPaymentDate = Carbon::parse($loanDetail->last_payment_date);
+
+                $emiData = ['clientid' => $loanDetail->clientid];
+
+                $currentMonth = Carbon::createFromFormat('Y-m', $firstPaymentDate->format('Y-m'));
+                while ($currentMonth->lte($lastPaymentDate)) {
+                    $monthColumn = $currentMonth->format('Y_M');
+                    $emiData[$monthColumn] = $emiAmount;
+
+                    $currentMonth->addMonth();
+                }
                 DB::table('emi_details')->insert($emiData);
-        }
+            }
+
         return true;
     }
 }
